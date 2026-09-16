@@ -3,6 +3,16 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
+<meta http-equiv="Content-Security-Policy" content="
+  default-src 'none';
+  script-src 'self' https://telegram.org;
+  style-src 'self';
+  img-src 'self' data:;
+  connect-src 'self' https://script.google.com https://script.googleusercontent.com;
+  base-uri 'none';
+  form-action 'none';">
+<meta name="referrer" content="no-referrer">
+<meta name="robots" content="noindex, nofollow">
 <title>Дневник</title>
 <link rel="stylesheet" href="стиль.css">
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
@@ -10,7 +20,7 @@
 <body>
 <div id="экран"></div>
 
-<nav id="меню">
+<nav id="меню" hidden>
   <button data-вкладка="день"><span>◔</span>День</button>
   <button data-вкладка="тренировка"><span>◍</span>Зал</button>
   <button data-вкладка="еда"><span>◑</span>Еда</button>

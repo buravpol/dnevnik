@@ -5,6 +5,16 @@ const тг = window.Telegram?.WebApp;
 const экран = document.getElementById('экран');
 const меню = document.getElementById('меню');
 
+// Приложение личное: открывается только с этого телеграм-аккаунта.
+const ХОЗЯЙКА = 521560502;
+const ОТЛАДКА = ['localhost', '127.0.0.1'].includes(location.hostname);
+
+function свой() {
+  if (ОТЛАДКА) return true;
+  const кто = тг?.initDataUnsafe?.user?.id;
+  return кто === ХОЗЯЙКА;
+}
+
 const ВКЛАДКИ = {
   день: () => import('./экраны/день.js'),
   тренировка: () => import('./экраны/зал.js'),
@@ -104,6 +114,12 @@ async function старт() {
   тг?.ready?.();
   тг?.expand?.();
   тема();
+
+  if (!свой()) {
+    нарисовать('<div class="пусто">Это личное приложение.<br>Оно открывается только у владельца.</div>');
+    return;
+  }
+  меню.hidden = false;
 
   const н = await настройки();
   if (!н.загружено && !location.hash.includes('настройка')) {

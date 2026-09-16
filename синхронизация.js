@@ -1,15 +1,24 @@
 // Обмен с гугл-таблицей. Идёт фоном: экраны никогда не ждут сеть.
+// Каждый запрос подписан телеграмом — таблица отдаёт данные только владелице.
 import { настройки, сохранитьНастройки, очередь, убратьИзОчереди, загрузитьДанные } from './хранилище.js';
+
+function подпись() {
+  // initData телеграма: строка, подписанная ботом. Проверяется на стороне скрипта.
+  return window.Telegram?.WebApp?.initData || '';
+}
 
 async function запрос(адрес, тело) {
   const ответ = await fetch(адрес, {
     method: 'POST',
-    // Apps Script не отдаёт заголовки CORS на preflight, поэтому «простой» запрос
+    // Apps Script не отвечает на preflight, поэтому запрос «простой»
     headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-    body: JSON.stringify(тело),
+    body: JSON.stringify({ ...тело, подпись: подпись() }),
+    referrerPolicy: 'no-referrer',
   });
   if (!ответ.ok) throw new Error('таблица ответила ' + ответ.status);
-  return ответ.json();
+  const итог = await ответ.json();
+  if (итог.ок === false) throw new Error(итог.ошибка || 'таблица отказала');
+  return итог;
 }
 
 /** Отправить накопленные изменения и забрать свежие данные. */
@@ -32,7 +41,5 @@ export async function синхронизировать({ полная = false } 
 
 /** Проверить связь с таблицей. */
 export async function проверить(адрес, ключ) {
-  const ответ = await запрос(адрес, { ключ, проверка: true });
-  if (!ответ.ок) throw new Error(ответ.ошибка || 'ключ не подошёл');
-  return ответ;
+  return запрос(адрес, { ключ, проверка: true });
 }
