@@ -1,0 +1,143 @@
+:root {
+  --фон: #0d0d0e;
+  --карточка: #1a1a1c;
+  --карточка2: #242427;
+  --текст: #f7f7f5;
+  --текст2: #8b8b90;
+  --линия: #2a2a2e;
+  --лайм: #c8f542;
+  --лайм-тень: rgba(200, 245, 66, 0.25);
+  --белый: #ffffff;
+  --красный: #ff6b4a;
+  --радиус: 24px;
+  --меню: 86px;
+}
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body {
+  margin: 0; padding: 0;
+  background: var(--фон); color: var(--текст);
+  font: 16px/1.35 -apple-system, "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
+  overscroll-behavior-y: contain;
+  -webkit-font-smoothing: antialiased;
+}
+body { padding-bottom: calc(var(--меню) + env(safe-area-inset-bottom)); }
+
+#экран { padding: 18px 16px 28px; max-width: 640px; margin: 0 auto; }
+
+h1 {
+  font-size: 40px; line-height: 0.95; margin: 4px 0 6px;
+  letter-spacing: -1.8px; font-weight: 700;
+}
+h2 {
+  font-size: 12px; margin: 26px 0 10px; color: var(--текст2);
+  font-weight: 600; text-transform: uppercase; letter-spacing: 1.2px;
+}
+.подпись { color: var(--текст2); font-size: 14px; margin: 0 0 18px; }
+
+.карточка {
+  background: var(--карточка); border-radius: var(--радиус);
+  padding: 18px 20px; margin-bottom: 10px;
+}
+.карточка.лайм { background: var(--лайм); color: #0d0d0e; }
+.карточка.лайм .мелко, .карточка.лайм .имя { color: rgba(13, 13, 14, 0.62); }
+.карточка.светлая { background: var(--белый); color: #0d0d0e; }
+.карточка.светлая .мелко { color: rgba(13, 13, 14, 0.55); }
+
+.строка { display: flex; align-items: center; justify-content: space-between; gap: 14px; }
+.строка + .строка { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--линия); }
+.карточка.лайм .строка + .строка { border-color: rgba(13, 13, 14, 0.14); }
+
+.цифра {
+  font-size: 40px; font-weight: 700; letter-spacing: -1.8px;
+  font-variant-numeric: tabular-nums; line-height: 1;
+}
+.цифра small { font-size: 13px; font-weight: 600; color: var(--текст2); margin-left: 4px;
+  letter-spacing: 0; }
+.карточка.лайм .цифра small { color: rgba(13, 13, 14, 0.6); }
+.мелко { font-size: 13px; color: var(--текст2); }
+.лайм-текст { color: var(--лайм); }
+.красный { color: var(--красный); }
+
+.плитки { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+.плитка {
+  background: var(--карточка); border-radius: var(--радиус); padding: 16px 18px;
+  min-height: 92px; display: flex; flex-direction: column; justify-content: space-between;
+}
+.плитка.лайм { background: var(--лайм); color: #0d0d0e; }
+.плитка.лайм .имя { color: rgba(13, 13, 14, 0.6); }
+.плитка .цифра { font-size: 30px; letter-spacing: -1.2px; }
+.плитка .имя { font-size: 12px; color: var(--текст2); text-transform: uppercase; letter-spacing: 0.8px; }
+
+button, input, select { font: inherit; color: inherit; }
+
+.кнопка {
+  display: block; width: 100%; padding: 17px; border: 0; border-radius: 999px;
+  background: var(--лайм); color: #0d0d0e; font-weight: 650; font-size: 16px;
+  margin-top: 12px; letter-spacing: -0.2px;
+}
+.кнопка:active { transform: scale(0.985); }
+.кнопка.тихая { background: var(--карточка2); color: var(--текст); }
+.кнопка.мелкая { padding: 11px 18px; font-size: 14px; width: auto; margin: 0; }
+
+input[type="number"], input[type="text"], input[type="file"], select {
+  background: var(--карточка2); border: 0; border-radius: 16px;
+  padding: 13px 15px; width: 100%; -webkit-appearance: none; appearance: none;
+  color: var(--текст);
+}
+input::placeholder { color: var(--текст2); }
+input[type="number"] { font-variant-numeric: tabular-nums; text-align: center; }
+.карточка.лайм input, .карточка.светлая input { background: rgba(13, 13, 14, 0.08); color: #0d0d0e; }
+
+/* полоса прогресса */
+.полоса {
+  height: 8px; background: rgba(255, 255, 255, 0.09); border-radius: 999px;
+  overflow: hidden; margin-top: 12px;
+}
+.карточка.лайм .полоса { background: rgba(13, 13, 14, 0.15); }
+.полоса i { display: block; height: 100%; background: var(--лайм); border-radius: 999px; }
+.карточка.лайм .полоса i { background: #0d0d0e; }
+.полоса i.перебор { background: var(--красный); }
+
+/* нижнее меню — круглые кнопки */
+#меню {
+  position: fixed; left: 12px; right: 12px; bottom: calc(10px + env(safe-area-inset-bottom));
+  z-index: 10; display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px;
+  background: var(--карточка); border-radius: 999px; padding: 8px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+}
+#меню button {
+  background: var(--карточка2); border: 0; border-radius: 999px; padding: 12px 2px 11px;
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+  font-size: 10px; color: var(--текст2); letter-spacing: 0.2px;
+}
+#меню button span { font-size: 17px; line-height: 1; }
+#меню button[data-активно] { background: var(--лайм); color: #0d0d0e; }
+
+/* тренировка */
+.упражнение { background: var(--карточка); border-radius: var(--радиус); padding: 18px 20px; margin-bottom: 10px; }
+.упражнение .имя { font-weight: 650; font-size: 17px; letter-spacing: -0.4px; }
+.подход { display: grid; grid-template-columns: 24px 1fr 1fr 58px; gap: 8px; align-items: center; margin-top: 10px; }
+.подход .номер { color: var(--текст2); font-size: 12px; text-align: center; }
+.подход .готово {
+  border: 0; border-radius: 999px; padding: 13px 0; background: var(--карточка2); color: var(--текст2);
+  font-size: 15px;
+}
+.подход .готово[data-сдан] { background: var(--лайм); color: #0d0d0e; }
+.прошлое { font-size: 12px; color: var(--текст2); margin-top: 8px; }
+.рекорд { color: var(--лайм); font-weight: 650; }
+
+/* графики */
+.график { background: var(--карточка); border-radius: var(--радиус); padding: 18px 12px 10px; margin-bottom: 10px; }
+.график .заголовок { padding: 0 8px 10px; display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+.график .заголовок b { font-size: 17px; letter-spacing: -0.4px; }
+svg { display: block; width: 100%; height: auto; overflow: visible; }
+
+.пусто { color: var(--текст2); text-align: center; padding: 44px 20px; font-size: 14px; }
+
+/* горизонтальный ряд кнопок-пилюль */
+.пилюли { display: flex; gap: 6px; margin-bottom: 14px; overflow-x: auto; }
+.пилюли button {
+  flex: 1; white-space: nowrap; border: 0; border-radius: 999px; padding: 11px 14px;
+  background: var(--карточка2); color: var(--текст2); font-size: 13px; font-weight: 600;
+}
+.пилюли button[data-активно] { background: var(--лайм); color: #0d0d0e; }
