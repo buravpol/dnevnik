@@ -92,7 +92,7 @@ export function частотаРефида(процентЖира) {
 
 // ——— даты ———
 export function сегодня() {
-  return новаяДата(new Date()).toISOString().slice(0, 10);
+  return ключДаты(new Date());
 }
 export function новаяДата(значение) {
   const д = значение instanceof Date ? new Date(значение) : new Date(значение + 'T00:00:00');
@@ -104,8 +104,12 @@ export function сдвинуть(дата, дней) {
   д.setDate(д.getDate() + дней);
   return д;
 }
+/** Ключ даты — строго по местному времени: через toISOString день уезжает назад. */
 export function ключДаты(дата) {
-  return новаяДата(дата).toISOString().slice(0, 10);
+  const д = новаяДата(дата);
+  const месяц = String(д.getMonth() + 1).padStart(2, '0');
+  const число = String(д.getDate()).padStart(2, '0');
+  return `${д.getFullYear()}-${месяц}-${число}`;
 }
 export function поРусски(дата) {
   return новаяДата(дата).toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' });

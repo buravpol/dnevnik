@@ -2,30 +2,24 @@ import { настройки } from './хранилище.js';
 import { синхронизировать } from './синхронизация.js';
 
 const тг = window.Telegram?.WebApp;
+const вТелеграме = Boolean(тг?.initData);
 const экран = document.getElementById('экран');
 const меню = document.getElementById('меню');
 
-// Приложение личное: открывается только с этого телеграм-аккаунта.
+// Приложение личное: внутри телеграма пускаем только этот аккаунт.
 const ХОЗЯЙКА = 521560502;
-const ОТЛАДКА = ['localhost', '127.0.0.1'].includes(location.hostname);
-
-function свой() {
-  if (ОТЛАДКА) return true;
-  const кто = тг?.initDataUnsafe?.user?.id;
-  return кто === ХОЗЯЙКА;
-}
 
 const ВКЛАДКИ = {
   день: () => import('./экраны/день.js'),
   тренировка: () => import('./экраны/зал.js'),
   еда: () => import('./экраны/еда.js'),
-  тело: () => import('./экраны/тело.js'),
-  аналитика: () => import('./экраны/аналитика.js'),
+  расчёты: () => import('./экраны/расчёты.js'),
 };
 
 export function нарисовать(html) {
   экран.innerHTML = html;
   экран.scrollTop = 0;
+  window.scrollTo(0, 0);
 }
 
 // Обработчики экрана. Слушатели навешаны один раз, набор обнуляется при смене вкладки.
@@ -66,6 +60,7 @@ export function число(значение, знаков = 0) {
 
 export function отклик(тип = 'light') {
   тг?.HapticFeedback?.impactOccurred?.(тип);
+  navigator.vibrate?.(тип === 'heavy' ? 18 : 8);
 }
 
 let текущая = null;
@@ -84,6 +79,7 @@ export async function открыть(имя) {
   обработчики.click.length = 0;
   обработчики.input.length = 0;
   localStorage.setItem('вкладка', имя);
+  меню.hidden = false;
   for (const кнопка of меню.children) {
     кнопка.toggleAttribute('data-активно', кнопка.dataset.вкладка === имя);
   }
@@ -103,11 +99,24 @@ export function обновить() {
   открыть(кнопка.dataset.вкладка);
 });
 
-// приложение всегда тёмное: палитра макета одна
 function тема() {
   document.documentElement.dataset.тема = 'тёмная';
   тг?.setBackgroundColor?.('#0d0d0e');
   тг?.setHeaderColor?.('#0d0d0e');
+}
+
+/** Подсказка, как поставить приложение на домашний экран (только в сафари на айфоне). */
+function приглашениеУстановить() {
+  const айфон = /iPhone|iPad|iPod/.test(navigator.userAgent);
+  const ужеПриложение = window.navigator.standalone
+    || window.matchMedia('(display-mode: standalone)').matches;
+  if (!айфон || ужеПриложение || вТелеграме || localStorage.getItem('подсказкаПоказана')) return '';
+  localStorage.setItem('подсказкаПоказана', 'да');
+  return `<div class="карточка" style="margin-bottom:14px">
+    <b>Поставь на домашний экран</b>
+    <div class="мелко" style="margin-top:6px">Кнопка «Поделиться» внизу сафари →
+      «На экран «Домой»». Дальше дневник открывается как обычное приложение и работает без сети.</div>
+  </div>`;
 }
 
 async function старт() {
@@ -115,15 +124,22 @@ async function старт() {
   тг?.expand?.();
   тема();
 
-  if (!свой()) {
+  if (вТелеграме && тг?.initDataUnsafe?.user?.id !== ХОЗЯЙКА) {
     нарисовать('<div class="пусто">Это личное приложение.<br>Оно открывается только у владельца.</div>');
     return;
   }
-  меню.hidden = false;
 
   let н = await настройки();
-  // первый запуск: сразу тянем данные из таблицы, никаких экранов настройки
+
+  // на домашнем экране нужен ключ — без него данные не забрать
+  if (!вТелеграме && !н.ключУстройства && !н.загружено) {
+    меню.hidden = true;
+    const модуль = await import('./экраны/ключ.js');
+    return модуль.показать();
+  }
+
   if (!н.загружено) {
+    меню.hidden = true;
     for (let попытка = 1; ; попытка++) {
       нарисовать(`<div class="пусто">Забираю данные из таблицы…${
         попытка > 1 ? `<br><br>попытка ${попытка}` : ''}</div>`);
@@ -145,12 +161,23 @@ async function старт() {
       }
     }
   }
-  if (!н.загружено && !location.hash.includes('настройка')) {
-    const модуль = await import('./экраны/настройка.js');
-    return модуль.показать();
-  }
+
   await открыть(localStorage.getItem('вкладка') || 'день');
+
+  const подсказка = приглашениеУстановить();
+  if (подсказка) экран.insertAdjacentHTML('afterbegin', подсказка);
+
   синхронизировать().catch(() => {});
 }
 
+// офлайн: приложение открывается и работает без сети
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').catch(() => {});
+}
+
 старт();
+
+// вернулись в приложение — досылаем накопленное
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden) синхронизировать().catch(() => {});
+});

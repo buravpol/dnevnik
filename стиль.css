@@ -98,19 +98,24 @@ input[type="number"] { font-variant-numeric: tabular-nums; text-align: center; }
 .карточка.лайм .полоса i { background: #0d0d0e; }
 .полоса i.перебор { background: var(--красный); }
 
-/* нижнее меню — круглые кнопки */
+/* нижнее меню — стеклянное */
 #меню {
-  position: fixed; left: 12px; right: 12px; bottom: calc(10px + env(safe-area-inset-bottom));
-  z-index: 10; display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px;
-  background: var(--карточка); border-radius: 999px; padding: 8px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+  position: fixed; left: 14px; right: 14px; bottom: calc(12px + env(safe-area-inset-bottom));
+  z-index: 10; display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px;
+  background: rgba(38, 38, 43, 0.62);
+  backdrop-filter: blur(24px) saturate(160%);
+  -webkit-backdrop-filter: blur(24px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 999px; padding: 6px;
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.55);
 }
 #меню button {
-  background: var(--карточка2); border: 0; border-radius: 999px; padding: 12px 2px 11px;
-  display: flex; flex-direction: column; align-items: center; gap: 3px;
+  background: none; border: 0; border-radius: 999px; padding: 12px 2px 11px;
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
   font-size: 10px; color: var(--текст2); letter-spacing: 0.2px;
+  transition: background 0.18s, color 0.18s;
 }
-#меню button span { font-size: 17px; line-height: 1; }
+#меню button span { font-size: 18px; line-height: 1; }
 #меню button[data-активно] { background: var(--лайм); color: #0d0d0e; }
 
 /* тренировка */
@@ -141,3 +146,62 @@ svg { display: block; width: 100%; height: auto; overflow: visible; }
   background: var(--карточка2); color: var(--текст2); font-size: 13px; font-weight: 600;
 }
 .пилюли button[data-активно] { background: var(--лайм); color: #0d0d0e; }
+
+
+/* ——— плашки показателей дня ——— */
+.показатели { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+.показатель {
+  background: var(--карточка); border-radius: var(--радиус); padding: 15px 16px 13px;
+  min-height: 104px; display: flex; flex-direction: column; justify-content: space-between;
+  position: relative;
+}
+.показатель.широкий { grid-column: span 2; }
+.показатель.лайм { background: var(--лайм); color: #0d0d0e; }
+.показатель .имя {
+  font-size: 11px; text-transform: uppercase; letter-spacing: 0.9px; color: var(--текст2);
+}
+.показатель.лайм .имя { color: rgba(13, 13, 14, 0.62); }
+.показатель .низ { display: flex; align-items: baseline; gap: 5px; }
+.показатель input {
+  background: none; border: 0; padding: 0; width: 100%;
+  font-size: 30px; font-weight: 700; letter-spacing: -1.4px; line-height: 1;
+  font-variant-numeric: tabular-nums; text-align: left; color: inherit;
+}
+.показатель input::placeholder { color: var(--текст2); opacity: 0.45; }
+.показатель .мера { font-size: 12px; color: var(--текст2); font-weight: 600; }
+.показатель.лайм .мера { color: rgba(13, 13, 14, 0.6); }
+.показатель .цель { font-size: 11px; color: var(--текст2); margin-top: 6px; }
+
+/* переключатель «была тренировка» и оценки */
+.выбор { display: flex; gap: 6px; margin-top: 8px; }
+.выбор button {
+  flex: 1; border: 0; border-radius: 999px; padding: 11px 0; font-size: 14px; font-weight: 600;
+  background: var(--карточка2); color: var(--текст2);
+}
+.выбор button[data-активно] { background: var(--лайм); color: #0d0d0e; }
+
+/* строка дат */
+.даты {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  margin-bottom: 16px;
+}
+.даты .стрелка {
+  width: 46px; height: 46px; border: 0; border-radius: 999px;
+  background: var(--карточка); color: var(--текст); font-size: 19px;
+}
+.даты .стрелка:disabled { opacity: 0.35; }
+.даты .середина { text-align: center; flex: 1; }
+.даты .середина b { display: block; font-size: 19px; letter-spacing: -0.5px; }
+.даты input[type="date"] {
+  background: none; border: 0; padding: 0; color: var(--текст2); font-size: 12px;
+  text-align: center; width: 100%;
+}
+
+/* сводка за неделю */
+.сводка { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px;
+  background: var(--линия); border-radius: var(--радиус); overflow: hidden; }
+.сводка div { background: var(--карточка); padding: 14px 10px; text-align: center; }
+.сводка .значение { font-size: 20px; font-weight: 700; letter-spacing: -0.7px;
+  font-variant-numeric: tabular-nums; }
+.сводка .имя { font-size: 10px; color: var(--текст2); text-transform: uppercase;
+  letter-spacing: 0.7px; margin-top: 4px; }
