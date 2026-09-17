@@ -17,20 +17,55 @@ function открыть() {
         }
       }
     };
-    запрос.onsuccess = () => успех(запрос.result);
-    запрос.onerror = () => ошибка(запрос.error);
+    запрос.onsuccess = () => {
+      const бд = запрос.result;
+      // вебвью телеграма умеет закрывать соединение на ходу — тогда откроем заново
+      бд.onclose = забыть;
+      бд.onversionchange = () => { бд.close(); забыть(); };
+      успех(бд);
+    };
+    запрос.onerror = () => { забыть(); ошибка(запрос.error); };
   });
   return база;
 }
 
-async function сделка(имя, режим, дело) {
+function забыть() {
+  база = null;
+}
+
+/** Обрыв соединения — не ошибка данных: достаточно переоткрыть базу и повторить. */
+function обрыв(ошибка) {
+  const текст = String(ошибка?.name || '') + ' ' + String(ошибка?.message || ошибка || '');
+  return /closing|InvalidStateError|TransactionInactiveError|AbortError|UnknownError/i.test(текст);
+}
+
+async function разСделка(имя, режим, дело) {
   const бд = await открыть();
   return new Promise((успех, ошибка) => {
-    const т = бд.transaction(имя, режим);
+    let т;
+    try {
+      т = бд.transaction(имя, режим);
+    } catch (сбой) {
+      забыть();
+      return ошибка(сбой);
+    }
     const результат = дело(т.objectStore(имя));
     т.oncomplete = () => успех(результат && результат.result !== undefined ? результат.result : результат);
     т.onerror = () => ошибка(т.error);
+    т.onabort = () => { забыть(); ошибка(т.error || new Error('транзакция прервана')); };
   });
+}
+
+async function сделка(имя, режим, дело, попыток = 3) {
+  for (let попытка = 1; ; попытка++) {
+    try {
+      return await разСделка(имя, режим, дело);
+    } catch (сбой) {
+      if (попытка >= попыток || !обрыв(сбой)) throw сбой;
+      забыть();
+      await new Promise((и) => setTimeout(и, 120 * попытка));
+    }
+  }
 }
 
 export const хранилище = {
@@ -39,29 +74,31 @@ export const хранилище = {
     return значение;
   },
   async взять(имя, ключ) {
-    const бд = await открыть();
-    return new Promise((успех) => {
-      const запрос = бд.transaction(имя).objectStore(имя).get(ключ);
-      запрос.onsuccess = () => успех(запрос.result || null);
-      запрос.onerror = () => успех(null);
-    });
+    try {
+      return (await сделка(имя, 'readonly', (х) => х.get(ключ))) || null;
+    } catch (сбой) {
+      return null;
+    }
   },
   async всё(имя) {
-    const бд = await открыть();
-    return new Promise((успех) => {
-      const запрос = бд.transaction(имя).objectStore(имя).getAll();
-      запрос.onsuccess = () => успех(запрос.result || []);
-      запрос.onerror = () => успех([]);
-    });
+    try {
+      return (await сделка(имя, 'readonly', (х) => х.getAll())) || [];
+    } catch (сбой) {
+      return [];
+    }
   },
   async очистить(имя) {
     await сделка(имя, 'readwrite', (х) => х.clear());
   },
-  async заменить(имя, записи, ключПоля = 'ключ') {
-    await сделка(имя, 'readwrite', (х) => {
-      х.clear();
-      for (const з of записи) х.put({ ...з, ключ: з[ключПоля] ?? з.ключ });
-    });
+  /** Пишем пачками: одна огромная транзакция в вебвью телеграма рвётся на полпути. */
+  async заменить(имя, записи, ключПоля = 'ключ', пачка = 150) {
+    await сделка(имя, 'readwrite', (х) => х.clear());
+    for (let с = 0; с < записи.length; с += пачка) {
+      const кусок = записи.slice(с, с + пачка);
+      await сделка(имя, 'readwrite', (х) => {
+        for (const з of кусок) х.put({ ...з, ключ: з[ключПоля] ?? з.ключ });
+      });
+    }
   },
 };
 
