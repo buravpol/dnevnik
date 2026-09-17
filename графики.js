@@ -88,3 +88,55 @@ export function карточка(заголовок, значение, соде�
     ${содержимое}
   </div>`;
 }
+
+/** Кольцо выполнения нормы: доля 0..1, внутри — значение. */
+export function кольцо(доля, { размер = 64, толщина = 7, цвет = 'var(--лайм)', внутри = '' } = {}) {
+  const радиус = (размер - толщина) / 2;
+  const длина = 2 * Math.PI * радиус;
+  const закрыто = Math.max(0, Math.min(1, доля || 0));
+  return `<svg viewBox="0 0 ${размер} ${размер}" style="width:${размер}px;height:${размер}px">
+    <circle cx="${размер / 2}" cy="${размер / 2}" r="${радиус}" fill="none"
+      stroke="rgba(255,255,255,0.1)" stroke-width="${толщина}"/>
+    <circle cx="${размер / 2}" cy="${размер / 2}" r="${радиус}" fill="none"
+      stroke="${цвет}" stroke-width="${толщина}" stroke-linecap="round"
+      stroke-dasharray="${(длина * закрыто).toFixed(1)} ${длина.toFixed(1)}"
+      transform="rotate(-90 ${размер / 2} ${размер / 2})"/>
+    ${внутри ? `<text x="50%" y="50%" text-anchor="middle" dominant-baseline="central"
+      font-size="${размер * 0.26}" font-weight="700" fill="var(--текст)">${внутри}</text>` : ''}
+  </svg>`;
+}
+
+/** Мини-столбики для плашки: без подписей, последний столбик выделен. */
+export function мини(значения, { цвет = 'var(--лайм)', высота = 52, выделить = true } = {}) {
+  const чистые = значения.filter(Number.isFinite);
+  if (!чистые.length) return `<div style="height:${высота}px"></div>`;
+  const макс = Math.max(...чистые);
+  const шаг = 100 / значения.length;
+  const бары = значения.map((з, i) => {
+    if (!Number.isFinite(з)) return '';
+    const h = Math.max(6, (з / макс) * 100);
+    const последний = выделить && i === значения.length - 1;
+    return `<rect x="${(i * шаг + шаг * 0.2).toFixed(2)}" y="${(100 - h).toFixed(1)}"
+      width="${(шаг * 0.6).toFixed(2)}" height="${h.toFixed(1)}" rx="${(шаг * 0.3).toFixed(2)}"
+      fill="${цвет}" opacity="${последний ? 1 : 0.42}"/>`;
+  }).join('');
+  return `<svg viewBox="0 0 100 100" preserveAspectRatio="none"
+    style="height:${высота}px;width:100%">${бары}</svg>`;
+}
+
+/** Мини-линия для плашки. */
+export function миниЛиния(значения, { цвет = 'var(--лайм)', высота = 52 } = {}) {
+  const чистые = значения.filter(Number.isFinite);
+  if (чистые.length < 2) return `<div style="height:${высота}px"></div>`;
+  const мин = Math.min(...чистые);
+  const макс = Math.max(...чистые);
+  const шагX = 100 / (чистые.length - 1);
+  const путь = чистые.map((з, i) => {
+    const y = 100 - ((з - мин) / (макс - мин || 1)) * 84 - 8;
+    return `${i ? 'L' : 'M'}${(i * шагX).toFixed(2)} ${y.toFixed(2)}`;
+  }).join(' ');
+  return `<svg viewBox="0 0 100 100" preserveAspectRatio="none" style="height:${высота}px;width:100%">
+    <path d="${путь}" fill="none" stroke="${цвет}" stroke-width="3" vector-effect="non-scaling-stroke"
+      stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>`;
+}

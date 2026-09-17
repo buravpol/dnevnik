@@ -205,3 +205,68 @@ svg { display: block; width: 100%; height: auto; overflow: visible; }
   font-variant-numeric: tabular-nums; }
 .сводка .имя { font-size: 10px; color: var(--текст2); text-transform: uppercase;
   letter-spacing: 0.7px; margin-top: 4px; }
+
+
+/* ——— календарь недели ——— */
+.неделя { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin-bottom: 16px; }
+.неделя button {
+  background: none; border: 0; padding: 0; display: flex; flex-direction: column;
+  align-items: center; gap: 6px; color: var(--текст2); font-size: 11px;
+}
+.неделя .круг {
+  width: 38px; height: 38px; position: relative;
+  display: flex; align-items: center; justify-content: center;
+}
+.неделя .круг svg { position: absolute; inset: 0; width: 38px; height: 38px; }
+.неделя .число { font-size: 13px; font-weight: 650; color: var(--текст); position: relative; }
+.неделя button[data-выбран] { color: var(--лайм); }
+.неделя button[data-выбран] .число { color: var(--лайм); }
+.неделя .галочка { position: relative; font-size: 15px; color: var(--лайм); }
+
+/* ——— плашки статистики с графиками ——— */
+.статы { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+.стат {
+  background: var(--карточка); border-radius: var(--радиус); padding: 16px 16px 12px;
+  display: flex; flex-direction: column; gap: 10px;
+}
+.стат.широкая { grid-column: span 2; }
+.стат .шапка { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.стат .шапка b { font-size: 14px; font-weight: 600; letter-spacing: -0.2px; }
+.стат .шапка .знак { font-size: 15px; }
+.стат .число { font-size: 26px; font-weight: 700; letter-spacing: -1.1px; line-height: 1;
+  font-variant-numeric: tabular-nums; }
+.стат .подпись2 { font-size: 11px; color: var(--текст2); text-transform: uppercase;
+  letter-spacing: 0.7px; margin-top: 4px; }
+.стат .ряд {
+  display: grid; grid-template-columns: auto minmax(0, 1fr);
+  align-items: center; gap: 14px;
+}
+.стат .ряд > :last-child { justify-self: end; min-width: 0; width: 100%; }
+.стат .ряд.кольцом { grid-template-columns: minmax(0, 1fr) auto; }
+
+/* таймер тренировки */
+.таймер {
+  position: sticky; top: 8px; z-index: 5;
+  background: rgba(38, 38, 43, 0.72);
+  backdrop-filter: blur(20px) saturate(160%); -webkit-backdrop-filter: blur(20px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 999px; padding: 12px 18px; margin-bottom: 12px;
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+}
+.таймер .время { font-size: 22px; font-weight: 700; font-variant-numeric: tabular-nums;
+  letter-spacing: -0.8px; }
+.таймер .отдых { font-size: 13px; color: var(--лайм); font-weight: 600; }
+
+/* выбор упражнений перед тренировкой */
+.выборУпр {
+  background: var(--карточка); border-radius: var(--радиус); padding: 15px 16px; margin-bottom: 8px;
+  display: flex; align-items: center; gap: 12px;
+}
+.выборУпр .галка {
+  width: 26px; height: 26px; border-radius: 999px; flex: none;
+  background: var(--карточка2); color: var(--текст2);
+  display: flex; align-items: center; justify-content: center; font-size: 14px;
+}
+.выборУпр[data-выбрано] .галка { background: var(--лайм); color: #0d0d0e; }
+.выборУпр .тело { flex: 1; min-width: 0; }
+.выборУпр .имя { font-weight: 600; font-size: 15px; letter-spacing: -0.2px; }
